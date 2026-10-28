@@ -6,8 +6,39 @@ Fixes campaign cutscene playback in **Heroes of Annihilated Empires** for the
 Theora/Vorbis video pack (`video/*.ogv` + `.oga`, referenced by tiny `.bik`
 stubs). On Windows 8+ the original DLL produced sound but no picture (black
 screen); the naive workaround then showed grayscale video in a small pixelated
-box. This repository contains the binary patcher for the game's
-`theovorb.dll` and the source of the injected x86 code.
+box. This repository contains two mods:
+
+* the **cutscene fix** - the binary patcher for the game's
+  `theovorb.dll` and the source of the injected x86 code (below);
+* **Metronome** - a 60 FPS limiter with an ImGui overlay, shipped
+  with a combined launcher that also installs the cutscene fix
+  (`Metronome/`).
+
+## Repository contents
+
+* `README.md`, `clipper.asm`, `patch_theovorb.py` - the cutscene fix.
+* `Metronome/` - 60 FPS limiter + ImGui overlay, with a combined launcher
+  (`MetronomeLauncher.exe`) that applies the cutscene fix before starting the
+  game.
+
+## Metronome (60 FPS + overlay)
+
+`Metronome/` injects a DLL into `engine.exe` before the game creates its D3D9
+device. `MetronomeLauncher.exe` installs the cutscene fix if needed, starts the
+game suspended, injects `Metronome.dll`, and resumes it. The DLL hooks the
+D3D9 `Present` call, enforces a 60 FPS minimum frame time with
+`QueryPerformanceCounter`, and renders an ImGui window (FPS counter, limiter
+toggle). The overlay is hidden at start; `Insert` toggles it.
+
+Build/install details are in `Metronome/README.md`. In short:
+
+1. Build with `metronome/build.bat` (Visual Studio 2022, x86).
+2. Copy `Metronome.dll` and `MetronomeLauncher.exe` into the game folder.
+3. Run `MetronomeLauncher.exe` (not Steam - the hooks must load before the
+   D3D9 device exists). It applies the cutscene fix on the first run and then
+   launches the game.
+
+`MetronomeLauncher.exe --patch "game folder"` applies only the cutscene fix.
 
 ## What it is
 
@@ -127,13 +158,13 @@ placed at RVA `0x59000` (the patcher asserts this).
 
 ```powershell
 # start from the pristine DLL (restore it if needed)
-python scripts\patch_theovorb.py "C:\path\to\theovorb.dll"
+python patch_theovorb.py "C:\path\to\theovorb.dll"
 ```
 
 The patcher writes `theovorb.dll.orig` next to the target and patches the DLL
 in place.
 
-## Installing
+## Installing (cutscene fix only)
 
 1. Back up the original `theovorb.dll` (the patcher also writes a `.orig`).
 2. Run the patcher on the game's `theovorb.dll` (see above).
