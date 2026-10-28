@@ -1,5 +1,7 @@
 # HoAE Cutscenes Fix
 
+0: Download the release and put everything into the main folder of the game
+
 Fixes campaign cutscene playback in **Heroes of Annihilated Empires** for the
 Theora/Vorbis video pack (`video/*.ogv` + `.oga`, referenced by tiny `.bik`
 stubs). On Windows 8+ the original DLL produced sound but no picture (black
